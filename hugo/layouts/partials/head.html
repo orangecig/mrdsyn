@@ -1,0 +1,54 @@
+{{- $title := cond (isset . "Title") .Title $.Site.Title -}}
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Accept-CH" content="DPR,Width,Viewport-Width" />
+<meta http-equiv="X-UA-Compatible" content="ie=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+<meta name="apple-mobile-web-app-title" content="{{ $title }}" />
+<meta name="application-name" content="{{ $title }}" />
+<meta name="msapplication-config" content="/favicons/browserconfig.xml" />
+<meta name="theme-color" content="#ffffff" />
+<meta name="description" content="{{ if .IsHome }}{{ $.Site.Params.description }}{{ else }}{{ .Description }}{{ end }} /">
+{{- with .Keywords -}}
+<meta name="keywords" content="{{ . }}" />
+{{- end -}}
+{{- if eq (getenv "HUGO_ENV") "production" | or (eq $.Site.Params.env "production") -}}
+  {{- $rfc850 := .ExpiryDate.Format "Monday, 02-Jan-06 15:04:05 MST" -}}
+  {{- $expiry := cond (isset $ "rfc850") "" (printf "%s%s" "unavailable_after: " (.ExpiryDate.Format "Monday, 02-Jan-06 15:04:05 MST")) -}}
+  <meta name="robots" content="index, follow{{ if not (eq $expiry "") }}, {{ $expiry }}{{ end }}" />
+{{- else -}}
+  <meta name="robots" content="noindex, nofollow" />
+{{- end -}}
+{{- partial "seo/opengraph" . -}}
+{{- partial "seo/googleNews" . -}}
+{{- partial "seo/schema" . -}}
+{{- partial "seo/twitterCards" . -}}
+{{ .Hugo.Generator }}
+<link rel="stylesheet" href="{{ "css/styles.min.css" | relURL }}?{{ readFile "static/css/styles.min.css" | md5 }}" type="text/css" />
+{{- if .IsHome -}}
+{{- range .Site.AllPages -}}
+{{- $section := .Section -}}
+{{- with .OutputFormats.Get "opensearch" -}}
+<link rel="search" type="application/opensearchdescription+xml" title="{{ $title }}{{ with $section }} {{ . }}{{ end }} search" href="{{ .RelPermalink | safeURL }}" />
+{{- end -}}
+{{- end -}}
+{{- end -}}
+<link rel="manifest" href="{{ "/favicons/manifest.json" | relURL }}" />
+<link rel="apple-touch-icon" sizes="180x180" href="{{ "/favicons/apple-touch-icon.png" | relURL }}" />
+<link rel="icon" type="image/png" href="{{ "/favicons/favicon-32x32.png" | relURL }}" sizes="32x32" />
+<link rel="icon" type="image/png" href="{{ "/favicons/favicon-16x16.png" | relURL }}" sizes="16x16" />
+<link rel="mask-icon" href="{{ "/favicons/safari-pinned-tab.svg" | relURL }}" color="#00c7b7" />
+{{- if .RSSLink -}}
+  <link href="{{ .RSSLink }}" rel="alternate" type="application/rss+xml" title="{{ $title }}" />
+  <link href="{{ .RSSLink }}" rel="feed" type="application/rss+xml" title="{{ $title }}" />
+{{- end -}}
+{{/* TODO: canonical + multilingual meta */}}
+{{- with $.Site.Params.gtmid -}}
+<!-- Google Tag Manager -->
+<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','{{ . }}');</script>
+<!-- End Google Tag Manager -->
+{{- end -}}
